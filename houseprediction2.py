@@ -61,9 +61,32 @@ print(f'r2 score is :{r2}')
 #step 6
 def predict_house(size,beds,age,distance):
     sample_data=pd.DataFrame([[size,beds,age,distance]],columns=X.columns)
-    scaled_sample=scaler.transform(sample_data)
+    scaled_sample=scaler.fit_transform(sample_data)
     prediction_value=model.predict(scaled_sample)[0]
     return prediction_value
 #test with a custom house 
 sample_price=predict_house(1200,2,5,8.5)
 print(f'prdicted price for custom house: rs{sample_price:,.2f}')
+
+#featur importance
+importance=model.feature_importances_
+feature_names=X_train.columns if hasattr(X_train,'columns')else[f'feature{i}'for i in range(X_train.shape[1])]
+
+feature_df=pd.DataFrame({
+    "feature":feature_names,
+    'importance':importance
+}).sort_values(by="importance",ascending=False)
+print("\n---feature Importance")
+print(feature_df)
+
+def prd_house(custom_features):
+    feature_array=np.array(custom_features).reshape(1,-1)
+
+    if 'scaler'in locals() or 'scaler'in globals():
+        feature_array=scaler.transform(feature_array)
+
+        predicted_price=model.predict(feature_array)[0]
+        return predicted_price
+
+price=prd_house([[1500,3,3,6]])
+print(f"new house prediction{price}")
